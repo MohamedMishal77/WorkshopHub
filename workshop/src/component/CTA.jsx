@@ -1,4 +1,4 @@
-import "../styles/CTA.css";
+import "../Styles/CTA.css";
 import { useNavigate } from "react-router-dom";
 
 const CTA = () => {
