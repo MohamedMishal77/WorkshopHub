@@ -11,6 +11,7 @@ function Login() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -19,6 +20,7 @@ function Login() {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setLoading(true);
 
     try {
       const res = await apiFetch("/api/auth/login", {
@@ -36,6 +38,8 @@ function Login() {
       }, 800);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -103,8 +107,8 @@ function Login() {
               </span>
             </div>
 
-            <button type="submit" className="auth-button">
-              Login
+            <button type="submit" className="auth-button" disabled={loading}>
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
 

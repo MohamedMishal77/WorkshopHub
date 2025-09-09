@@ -18,6 +18,7 @@ function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [passwordValidations, setPasswordValidations] = useState({
     length: false,
@@ -35,7 +36,6 @@ function Register() {
     };
     setPasswordValidations(updated);
 
-    // ✅ Auto-close overlay if all conditions met
     if (Object.values(updated).every(Boolean)) {
       setShowOverlay(false);
     }
@@ -48,9 +48,11 @@ function Register() {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setLoading(true);
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
+      setLoading(false);
       return;
     }
 
@@ -74,6 +76,8 @@ function Register() {
       }, 1000);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -154,7 +158,6 @@ function Register() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </span>
 
-              {/* Password Overlay */}
               {showOverlay && (
                 <div className="auth-password-overlay">
                   <p>Password must include:</p>
@@ -197,8 +200,8 @@ function Register() {
               </span>
             </div>
 
-            <button type="submit" className="auth-button">
-              Register
+            <button type="submit" className="auth-button" disabled={loading}>
+              {loading ? "Registering..." : "Register"}
             </button>
           </form>
 
