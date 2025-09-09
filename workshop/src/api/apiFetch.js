@@ -6,6 +6,9 @@ export default async function apiFetch(input, init = {}) {
 
   const url = input.startsWith("http") ? input : baseUrl + input;
 
+  console.log("API Base:", import.meta.env.VITE_API_BASE);
+
+
   const defaultOpts = {
     credentials: "include", // 🔥 ensures cookies are sent
     headers: {
