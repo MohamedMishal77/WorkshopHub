@@ -13,19 +13,18 @@ const isProd = process.env.NODE_ENV === "production";
 
 const accessCookieOptions = {
   httpOnly: true,
-  secure: isProd,          // must be true in production
-  sameSite: "none",        // <-- change from "lax" to "none"
-  maxAge: 15 * 60 * 1000,  // 15 minutes
-  path: "/",               // ensure it's valid everywhere
+  secure: isProd,       // must be HTTPS
+  sameSite: isProd ? "none" : "lax", // allows cross-site on prod
+  maxAge: 15 * 60 * 1000
 };
 
 const refreshCookieOptions = {
   httpOnly: true,
   secure: isProd,
-  sameSite: "none",        // <-- change from "lax" to "none"
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  path: "/api/auth/refresh" // optional: limit refresh cookie scope
+  sameSite: isProd ? "none" : "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000
 };
+
 
 
 // Helpers
