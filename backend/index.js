@@ -1,45 +1,33 @@
 // backend/index.js
-import express from 'express';
-import cors from 'cors';
-import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
-import authRoutes from './routes/authRoutes.js';
-import eventsRoutes from './routes/eventRoutes.js';
-import registrationRoutes from './routes/registrationRoutes.js';
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
+import authRoutes from "./routes/authRoutes.js";
+import eventsRoutes from "./routes/eventRoutes.js";
+import registrationRoutes from "./routes/registrationRoutes.js";
 
 dotenv.config();
 
 const app = express();
 
 // If behind a proxy (like when deployed), uncomment:
-// app.set('trust proxy', 1);
+// app.set("trust proxy", 1);
 
-// ✅ Setup CORS
-const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [
+// ✅ Allow only known origins
+const allowedOrigins = [
   "http://localhost:5173",
   "https://theworkshophub.netlify.app"
 ];
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin) {
-        // Allow requests with no origin (like mobile apps, curl, Postman)
-        return callback(null, true);
-      }
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      return callback(new Error("Not allowed by CORS"));
-    },
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
-
-// ✅ Handle OPTIONS preflight explicitly
-app.options("*", cors());
 
 // Middleware
 app.use(express.json());
