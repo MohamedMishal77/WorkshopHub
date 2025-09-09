@@ -1,0 +1,149 @@
+/* Base Nav */
+.nav {
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+}
+
+/* Left side */
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+}
+.nav-logo-icon {
+  width: 32px;
+  height: 32px;
+  color: #2563eb;
+}
+.nav-logo-text {
+  margin-left: 8px;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #111827;
+}
+
+/* Links */
+.nav-links {
+  display: flex;
+  gap: 0.5rem;
+}
+.nav-link {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #4b5563;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+.nav-link:hover {
+  color: #111827;
+  background: #f3f4f6;
+}
+.nav-link.active {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.nav-link-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Actions */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.host-btn {
+  background: #2563eb;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.host-btn:hover {
+  background: #1d4ed8;
+}
+.logout-btn {
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #4b5563;
+  transition: all 0.2s;
+}
+.logout-btn:hover {
+  color: #111827;
+  background: #f3f4f6;
+}
+.nav-action-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Mobile Nav */
+.mobile-nav {
+  display: none;
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
+  padding: 0.5rem 0;
+  justify-content: space-around;
+}
+.mobile-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #4b5563;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  gap: 4px;
+}
+.mobile-link.active {
+  color: #2563eb;
+}
+.mobile-icon {
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+  .mobile-nav {
+    display: flex;
+  }
+}

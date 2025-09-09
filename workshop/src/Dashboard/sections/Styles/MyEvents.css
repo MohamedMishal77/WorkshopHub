@@ -1,0 +1,104 @@
+.my-events-container {
+  max-width: 1280px; /* same as max-w-7xl */
+  margin: 0 auto;
+  padding: 2rem 1rem; /* px-4 py-8 */
+}
+
+@media (min-width: 640px) {
+  .my-events-container {
+    padding-left: 1.5rem; /* sm:px-6 */
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .my-events-container {
+    padding-left: 2rem; /* lg:px-8 */
+    padding-right: 2rem;
+  }
+}
+
+.my-events-header {
+  margin-bottom: 2rem;
+}
+
+.my-events-title {
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: bold;
+  color: #111827; /* gray-900 */
+  margin-bottom: 0.5rem;
+}
+
+.my-events-subtitle {
+  color: #4b5563; /* gray-600 */
+}
+
+.my-events-empty {
+  background-color: #ffffff;
+  border-radius: 0.75rem; /* rounded-xl */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* shadow-sm */
+  padding: 3rem; /* p-12 */
+  text-align: center;
+}
+
+.my-events-empty-icon {
+  font-size: 3.75rem; /* text-6xl */
+  color: #9ca3af; /* gray-400 */
+  margin-bottom: 1rem;
+}
+
+.my-events-empty-title {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 600;
+  color: #111827; /* gray-900 */
+  margin-bottom: 0.5rem;
+}
+
+.my-events-empty-text {
+  color: #4b5563; /* gray-600 */
+  margin-bottom: 1.5rem;
+}
+
+.my-events-browse-btn {
+  background-color: #2563eb; /* blue-600 */
+  color: #ffffff;
+  padding: 0.75rem 1.5rem; /* px-6 py-3 */
+  border-radius: 0.5rem; /* rounded-lg */
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  border: none;
+}
+
+.my-events-browse-btn:hover {
+  background-color: #1d4ed8; /* blue-700 */
+}
+.my-events-filter {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  margin-top: 12px;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  background-size: 16px;
+}
+
+.my-events-filter:hover {
+  border-color: #007bff;
+}
+
+.my-events-filter:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.my-events-filter option {
+  
+  font-size: 14px;
+  color: #333;
+  background-color: #fff;
+}

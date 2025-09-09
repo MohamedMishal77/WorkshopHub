@@ -1,0 +1,34 @@
+.all-events-container {
+  max-width: 1280px; /* similar to max-w-7xl */
+  margin: 0 auto;
+  padding: 2rem 1rem; /* px-4 py-8 */
+}
+
+@media (min-width: 640px) {
+  .all-events-container {
+    padding-left: 1.5rem; /* sm:px-6 */
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .all-events-container {
+    padding-left: 2rem; /* lg:px-8 */
+    padding-right: 2rem;
+  }
+}
+
+.all-events-header {
+  margin-bottom: 2rem;
+}
+
+.all-events-title {
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: bold;
+  color: #111827; /* gray-900 */
+  margin-bottom: 0.5rem;
+}
+
+.all-events-subtitle {
+  color: #4b5563; /* gray-600 */
+}

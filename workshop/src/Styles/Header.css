@@ -1,0 +1,154 @@
+/* ===== Navigation Bar ===== */
+.nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 50;
+  background: hsla(var(--background), 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+/* ===== Logo ===== */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-glow));
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: var(--foreground);
+}
+
+/* ===== Desktop Links ===== */
+.nav-links {
+  display: none;
+}
+
+.nav-links a {
+  color: var(--foreground);
+  font-weight: 500;
+  transition: color 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.nav-links a:hover {
+  color: var(--primary);
+}
+
+/* ===== Auth Buttons ===== */
+.nav-auth {
+  display: none;
+  gap: 1rem;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  transition: var(--transition-smooth);
+  cursor: pointer;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--foreground);
+}
+
+.btn-ghost:hover {
+  background: var(--secondary);
+}
+
+.btn-gradient {
+  background: var(--gradient-primary);
+  color: var(--primary-foreground);
+  box-shadow: var(--shadow-card);
+  border: none;
+}
+
+.btn-gradient:hover {
+  opacity: 0.9;
+}
+
+/* ===== Mobile Menu Button ===== */
+.menu-btn {
+  background: none;
+  display: block;
+  border: none;
+  color: var(--foreground);
+}
+
+/* ===== Mobile Menu ===== */
+.mobile-menu {
+  display: flex;
+  flex-direction: column;
+  margin-left :25px;
+  backdrop-filter: blur(10px) ;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.mobile-menu a {
+  font-weight: 500;
+  color: var(--foreground);
+  transition: color 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.mobile-menu a:hover {
+  color: var(--primary);
+}
+
+.mobile-auth {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1rem;
+}
+
+/* ===== Responsive ===== */
+@media (min-width: 768px) {
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .nav-auth {
+    display: flex;
+  }
+
+  .menu-btn {
+    display: none;
+  }
+
+  .mobile-menu {
+    display: none;
+  }
+}
