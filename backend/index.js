@@ -14,31 +14,45 @@ const app = express();
 // If behind a proxy (like when deployed), uncomment:
 // app.set('trust proxy', 1);
 
-// ✅ Setup CORS with environment variable
-const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || ["http://localhost:5173"];
+// ✅ Setup CORS
+const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [
+  "http://localhost:5173",
+  "https://theworkshophub.netlify.app"
+];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) {
+        // Allow requests with no origin (like mobile apps, curl, Postman)
+        return callback(null, true);
+      }
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 
+// ✅ Handle OPTIONS preflight explicitly
+app.options("*", cors());
+
+// Middleware
 app.use(express.json());
 app.use(cookieParser());
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/events', eventsRoutes);
-app.use('/api/registrations', registrationRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/events", eventsRoutes);
+app.use("/api/registrations", registrationRoutes);
 
 // Health check
-app.get('/', (req, res) => {
-  res.send('API is running...');
+app.get("/", (req, res) => {
+  res.send("API is running...");
 });
 
 const PORT = process.env.PORT || 5000;
