@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BookOpen, Menu, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import "../styles/Header.css";
+import "../Styles/Header.css";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
