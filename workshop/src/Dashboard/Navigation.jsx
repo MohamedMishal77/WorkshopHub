@@ -1,7 +1,7 @@
 // src/Dashboard/Navigation.jsx
 import React from "react";
 import { Calendar, Plus, LogOut, Users, BookOpen } from "lucide-react";
-import "../styles/Navigation.css";
+import "../Styles/Navigation.css";
 
 const Navigation = ({ currentSection, onSectionChange, onLogout }) => {
   const navItems = [
