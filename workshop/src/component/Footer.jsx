@@ -1,4 +1,4 @@
-import "../Styles/Footer.css";
+import "../Styles/footer.css";
 import { BookOpen, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
 
 const Footer = () => {
