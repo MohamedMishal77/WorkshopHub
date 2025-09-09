@@ -4,7 +4,7 @@ import Register from "./Pages/Register";
 import Login from "./Pages/Login";
 import Dashboard from "./Pages/Dashboard";
 import ErrorPage from "./Pages/ErrorPage";
-import ProtectedRoute from "./component/protectedRoute";
+import ProtectedRoute from "./component/ProtectedRoute";
 
 function App() {
   return (
