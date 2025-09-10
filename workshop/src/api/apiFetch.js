@@ -1,44 +1,39 @@
-
-
 // src/api/apiFetch.js
-// central fetch helper that always includes credentials and attempts one refresh on 401
 export default async function apiFetch(input, init = {}) {
   const baseUrl =
     import.meta.env.VITE_API_BASE || "http://localhost:5000"; // fallback
 
   const url = input.startsWith("http") ? input : baseUrl + input;
 
-  console.log("API Base:", import.meta.env.VITE_API_BASE);
+  const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
+  const defaultHeaders = { "Content-Type": "application/json" };
 
-  const defaultOpts = {
-    credentials: "include", // 🔥 ensures cookies are sent
-    headers: {
-      "Content-Type": "application/json",
-    },
-  };
+  // If iOS, try to read tokens from localStorage
+  const accessToken = isiOS ? localStorage.getItem("accessToken") : null;
 
   const opts = {
-    ...defaultOpts,
+    credentials: isiOS ? "omit" : "include", // omit cookies for iOS
+    headers: {
+      ...defaultHeaders,
+      ...(init.headers || {}),
+      ...(isiOS && accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    },
     ...init,
-    headers: { ...(defaultOpts.headers || {}), ...(init.headers || {}) },
   };
 
-  // First attempt
   let res = await fetch(url, opts);
 
-  if (res.status === 401) {
-    // try refresh
+  // Token refresh logic for cookie flow only
+  if (!isiOS && res.status === 401) {
     const refreshRes = await fetch(baseUrl + "/api/auth/refresh", {
       method: "POST",
-      credentials: "include", // ensure refresh cookies are sent
+      credentials: "include",
     });
 
     if (refreshRes.ok) {
-      // Refresh succeeded -> retry original request with fresh cookie
       res = await fetch(url, opts);
     } else {
-      // Refresh failed -> force logout scenario
       console.warn("Refresh token failed. User needs to re-login.");
       return refreshRes;
     }

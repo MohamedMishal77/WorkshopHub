@@ -16,6 +16,12 @@ function Login() {
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
+  // Helper: store tokens for iOS
+  const storeTokensForIOS = (accessToken, refreshToken) => {
+    localStorage.setItem("accessToken", accessToken);
+    localStorage.setItem("refreshToken", refreshToken);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -26,29 +32,29 @@ function Login() {
       const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
       if (isiOS) {
-        // 🔑 Fallback for iOS Safari/Chrome: do full-page POST
-        const form = document.createElement("form");
-        form.method = "POST";
-        form.action = "https://workshophub-qast.onrender.com/api/auth/login-redirect";
+        // 🔑 Hybrid flow: call /login-redirect and store tokens manually
+        const res = await fetch(
+          "https://workshophub-qast.onrender.com/api/auth/login-redirect",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+          }
+        );
 
-        const emailField = document.createElement("input");
-        emailField.type = "hidden";
-        emailField.name = "email";
-        emailField.value = formData.email;
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Login failed");
 
-        const passField = document.createElement("input");
-        passField.type = "hidden";
-        passField.name = "password";
-        passField.value = formData.password;
+        storeTokensForIOS(data.accessToken, data.refreshToken);
 
-        form.appendChild(emailField);
-        form.appendChild(passField);
-        document.body.appendChild(form);
-        form.submit();
-        return; // stop here for iOS
+        setSuccess("Login successful! Redirecting...");
+        setTimeout(() => {
+          navigate("/dashboard", { replace: true });
+        }, 800);
+        return;
       }
 
-      // ✅ normal fetch flow for others
+      // ✅ normal cookie flow for others
       const res = await apiFetch("/api/auth/login", {
         method: "POST",
         credentials: "include",
@@ -71,7 +77,7 @@ function Login() {
 
   return (
     <div className="auth-page">
-      {/* ===== Header ===== */}
+      {/* Header */}
       <header className="auth-header">
         <div className="auth-header-logo" onClick={() => navigate("/")}>
           <div className="auth-logo-icon">
@@ -87,7 +93,7 @@ function Login() {
         </button>
       </header>
 
-      {/* ===== Auth Card ===== */}
+      {/* Auth Card */}
       <div className="auth-container">
         <div className="auth-card">
           <h2>Login</h2>
@@ -98,7 +104,6 @@ function Login() {
           <form onSubmit={handleSubmit}>
             <input
               type="email"
-              id="login-email"
               name="email"
               placeholder="Email"
               value={formData.email}
@@ -111,7 +116,6 @@ function Login() {
             <div className="auth-password-wrapper">
               <input
                 type={showPassword ? "text" : "password"}
-                id="login-password"
                 name="password"
                 placeholder="Password"
                 value={formData.password}
