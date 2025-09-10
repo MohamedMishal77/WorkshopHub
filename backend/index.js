@@ -17,7 +17,8 @@ const app = express();
 // ✅ Allow only known origins
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://theworkshophub.netlify.app"
+  "https://theworkshophub.netlify.app",
+  "https://theworkshophub.onrender.com"
 ];
 
 app.use(
