@@ -120,19 +120,22 @@ router.post("/login", async (req, res) => {
 // ==================== LOGIN-REDIRECT (for iOS Safari/Chrome) ====================
 router.post("/login-redirect", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
 
-    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
-      email
-    ]);
+    if (!email || !password) {
+      return res.redirect(`${process.env.FRONTEND_URL}/login?error=Missing+credentials`);
+    }
+
+    // Same logic as /login
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
     if (result.rows.length === 0) {
-      return res.status(401).send("Invalid credentials");
+      return res.redirect(`${process.env.FRONTEND_URL}/login?error=Invalid+credentials`);
     }
 
     const user = result.rows[0];
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) {
-      return res.status(401).send("Invalid credentials");
+      return res.redirect(`${process.env.FRONTEND_URL}/login?error=Invalid+credentials`);
     }
 
     const accessToken = generateAccessToken(user);
@@ -147,13 +150,14 @@ router.post("/login-redirect", async (req, res) => {
     res.cookie("accessToken", accessToken, accessCookieOptions);
     res.cookie("refreshToken", refreshToken, refreshCookieOptions);
 
-    // 🔑 Important: redirect back to frontend dashboard
-    return res.redirect("https://theworkshophub.netlify.app/dashboard");
+    // ✅ redirect back to frontend (cookies now set properly)
+    return res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
   } catch (err) {
     console.error("Login redirect error:", err);
-    res.status(500).send("Server error");
+    return res.redirect(`${process.env.FRONTEND_URL}/login?error=Server+error`);
   }
 });
+
 
 // ==================== REFRESH TOKEN (with rotation) ====================
 router.post("/refresh", async (req, res) => {
