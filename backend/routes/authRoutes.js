@@ -161,7 +161,15 @@ router.post("/login-redirect", async (req, res) => {
 
 // ==================== REFRESH TOKEN (with rotation) ====================
 router.post("/refresh", async (req, res) => {
-  const oldRefreshToken = req.cookies.refreshToken;
+  // ✅ Hybrid: support both cookie and header refresh token
+  let oldRefreshToken = req.cookies.refreshToken;
+  if (!oldRefreshToken && req.headers.authorization) {
+    const [scheme, token] = req.headers.authorization.split(" ");
+    if (scheme === "Bearer") {
+      oldRefreshToken = token;
+    }
+  }
+
   if (!oldRefreshToken) return res.sendStatus(401);
 
   try {
@@ -201,10 +209,15 @@ router.post("/refresh", async (req, res) => {
 
     const accessToken = generateAccessToken(user);
 
+    // ✅ Send new tokens back
     res.cookie("accessToken", accessToken, accessCookieOptions);
     res.cookie("refreshToken", newRefreshToken, refreshCookieOptions);
 
-    res.json({ message: "Token refreshed" });
+    res.json({
+      message: "Token refreshed",
+      accessToken,       // for iOS clients (localStorage)
+      refreshToken: newRefreshToken
+    });
   } catch (err) {
     console.error("Refresh error:", err);
     res.status(403).json({ message: "Invalid refresh token" });
