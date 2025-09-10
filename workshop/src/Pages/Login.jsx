@@ -23,6 +23,32 @@ function Login() {
     setLoading(true);
 
     try {
+      const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+      if (isiOS) {
+        // 🔑 Fallback for iOS Safari/Chrome: do full-page POST
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "https://workshophub-qast.onrender.com/api/auth/login-redirect";
+
+        const emailField = document.createElement("input");
+        emailField.type = "hidden";
+        emailField.name = "email";
+        emailField.value = formData.email;
+
+        const passField = document.createElement("input");
+        passField.type = "hidden";
+        passField.name = "password";
+        passField.value = formData.password;
+
+        form.appendChild(emailField);
+        form.appendChild(passField);
+        document.body.appendChild(form);
+        form.submit();
+        return; // stop here for iOS
+      }
+
+      // ✅ normal fetch flow for others
       const res = await apiFetch("/api/auth/login", {
         method: "POST",
         credentials: "include",
@@ -47,10 +73,7 @@ function Login() {
     <div className="auth-page">
       {/* ===== Header ===== */}
       <header className="auth-header">
-        <div
-          className="auth-header-logo"
-          onClick={() => navigate("/")}
-        >
+        <div className="auth-header-logo" onClick={() => navigate("/")}>
           <div className="auth-logo-icon">
             <BookOpen size={20} color="white" />
           </div>
@@ -73,7 +96,6 @@ function Login() {
           {success && <p className="auth-success-message">{success}</p>}
 
           <form onSubmit={handleSubmit}>
-            {/* Email */}
             <input
               type="email"
               id="login-email"
@@ -86,7 +108,6 @@ function Login() {
               autoComplete="email"
             />
 
-            {/* Password Input */}
             <div className="auth-password-wrapper">
               <input
                 type={showPassword ? "text" : "password"}
