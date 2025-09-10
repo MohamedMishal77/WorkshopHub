@@ -9,12 +9,14 @@ const router = express.Router();
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
+// backend/routes/authRoutes.js
 const isProd = process.env.NODE_ENV === "production";
 
 const accessCookieOptions = {
   httpOnly: true,
-  secure: isProd,       // must be HTTPS
-  sameSite: isProd ? "none" : "lax", // allows cross-site on prod
+  secure: isProd,              // must be true when served over HTTPS (production)
+  sameSite: isProd ? "none" : "lax", // allow cross-site on prod
+  path: "/",                   // explicit
   maxAge: 15 * 60 * 1000
 };
 
@@ -22,8 +24,10 @@ const refreshCookieOptions = {
   httpOnly: true,
   secure: isProd,
   sameSite: isProd ? "none" : "lax",
+  path: "/",
   maxAge: 7 * 24 * 60 * 60 * 1000
 };
+
 
 
 
@@ -211,6 +215,7 @@ router.post("/logout", async (req, res) => {
 // ==================== VALIDATE ACCESS TOKEN ====================
 router.get("/validate", (req, res) => {
   try {
+    console.log("Incoming cookies on /validate:", req.cookies); 
     const token = req.cookies.accessToken;
     if (!token) {
       return res.status(401).json({ message: "No token provided" });

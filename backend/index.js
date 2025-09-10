@@ -12,7 +12,7 @@ dotenv.config();
 const app = express();
 
 // If behind a proxy (like when deployed), uncomment:
-// app.set("trust proxy", 1);
+ app.set("trust proxy", 1);
 
 // ✅ Allow only known origins
 const allowedOrigins = [
