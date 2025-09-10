@@ -11,11 +11,13 @@ dotenv.config();
 
 const app = express();
 
-app.set("trust proxy", 1);
+// If behind a proxy (like when deployed), uncomment:
+// app.set("trust proxy", 1);
 
+// ✅ Allow only known origins
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://theworkshophub.netlify.app",
+  "https://theworkshophub.netlify.app"
 ];
 
 app.use(
@@ -26,7 +28,6 @@ app.use(
     credentials: true,
   })
 );
-
 
 // Middleware
 app.use(express.json());

@@ -13,18 +13,16 @@ const isProd = process.env.NODE_ENV === "production";
 
 const accessCookieOptions = {
   httpOnly: true,
-  secure: isProd,             // must be HTTPS in production
-  sameSite: isProd ? "None" : "Lax", // Safari needs "None" for cross-site
-  path: "/",                  // ✅ important for iOS, makes cookie global
-  maxAge: 15 * 60 * 1000,     // 15 mins
+  secure: isProd,       // must be HTTPS
+  sameSite: isProd ? "none" : "lax", // allows cross-site on prod
+  maxAge: 15 * 60 * 1000
 };
 
 const refreshCookieOptions = {
   httpOnly: true,
   secure: isProd,
-  sameSite: isProd ? "None" : "Lax",
-  path: "/",                  // ✅ allow refresh route to read it
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  sameSite: isProd ? "none" : "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000
 };
 
 
