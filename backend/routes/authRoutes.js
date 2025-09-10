@@ -13,9 +13,9 @@ const isProd = process.env.NODE_ENV === "production";
 
 const accessCookieOptions = {
   httpOnly: true,
-  secure: isProd,              
-  sameSite: isProd ? "none" : "lax", 
-  path: "/",                   
+  secure: isProd,
+  sameSite: isProd ? "none" : "lax",
+  path: "/",
   maxAge: 15 * 60 * 1000
 };
 
@@ -117,25 +117,24 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ==================== LOGIN-REDIRECT (for iOS Safari/Chrome) ====================
+// ==================== LOGIN-REDIRECT (Hybrid for iOS) ====================
 router.post("/login-redirect", async (req, res) => {
   try {
     const { email, password } = req.body || {};
 
     if (!email || !password) {
-      return res.redirect(`${process.env.FRONTEND_URL}/login?error=Missing+credentials`);
+      return res.status(400).json({ message: "Missing credentials" });
     }
 
-    // Same logic as /login
     const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
     if (result.rows.length === 0) {
-      return res.redirect(`${process.env.FRONTEND_URL}/login?error=Invalid+credentials`);
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const user = result.rows[0];
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) {
-      return res.redirect(`${process.env.FRONTEND_URL}/login?error=Invalid+credentials`);
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const accessToken = generateAccessToken(user);
@@ -147,17 +146,18 @@ router.post("/login-redirect", async (req, res) => {
       [user.id, refreshToken]
     );
 
-    res.cookie("accessToken", accessToken, accessCookieOptions);
-    res.cookie("refreshToken", refreshToken, refreshCookieOptions);
-
-    // ✅ redirect back to frontend (cookies now set properly)
-    return res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+    // 🔑 For iOS: return JSON instead of relying on cookies
+    return res.json({
+      message: "Login successful (iOS hybrid)",
+      accessToken,
+      refreshToken,
+      user: { id: user.id, email: user.email, user_name: user.user_name }
+    });
   } catch (err) {
     console.error("Login redirect error:", err);
-    return res.redirect(`${process.env.FRONTEND_URL}/login?error=Server+error`);
+    return res.status(500).json({ message: "Server error" });
   }
 });
-
 
 // ==================== REFRESH TOKEN (with rotation) ====================
 router.post("/refresh", async (req, res) => {
@@ -233,7 +233,17 @@ router.post("/logout", async (req, res) => {
 router.get("/validate", (req, res) => {
   try {
     console.log("Incoming cookies on /validate:", req.cookies);
-    const token = req.cookies.accessToken;
+
+    let token = req.cookies.accessToken;
+
+    // 🔑 If not found in cookies, check Authorization header (for iOS hybrid)
+    if (!token && req.headers.authorization) {
+      const authHeader = req.headers.authorization;
+      if (authHeader.startsWith("Bearer ")) {
+        token = authHeader.substring(7);
+      }
+    }
+
     if (!token) {
       return res.status(401).json({ message: "No token provided" });
     }
