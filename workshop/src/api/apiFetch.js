@@ -9,7 +9,7 @@ export default async function apiFetch(input, init = {}) {
 
   const defaultHeaders = { "Content-Type": "application/json" };
 
-  // If iOS, try to read tokens from localStorage
+  // 🔑 Get access token depending on platform
   const accessToken = isiOS ? localStorage.getItem("accessToken") : null;
 
   const opts = {
@@ -24,7 +24,11 @@ export default async function apiFetch(input, init = {}) {
 
   let res = await fetch(url, opts);
 
-  // Token refresh logic for cookie flow only
+  // =========================
+  // 🔄 TOKEN REFRESH LOGIC
+  // =========================
+
+  // ---- Cookie flow (Desktop/Android)
   if (!isiOS && res.status === 401) {
     const refreshRes = await fetch(baseUrl + "/api/auth/refresh", {
       method: "POST",
@@ -34,7 +38,46 @@ export default async function apiFetch(input, init = {}) {
     if (refreshRes.ok) {
       res = await fetch(url, opts);
     } else {
-      console.warn("Refresh token failed. User needs to re-login.");
+      console.warn("Cookie refresh failed. User must re-login.");
+      return refreshRes;
+    }
+  }
+
+  // ---- LocalStorage flow (iOS)
+  if (isiOS && res.status === 401) {
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (!refreshToken) {
+      console.warn("No refresh token in localStorage. User must re-login.");
+      return res;
+    }
+
+    const refreshRes = await fetch(baseUrl + "/api/auth/refresh", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (refreshRes.ok) {
+      const data = await refreshRes.json();
+      if (data.accessToken) {
+        localStorage.setItem("accessToken", data.accessToken);
+      }
+      if (data.refreshToken) {
+        localStorage.setItem("refreshToken", data.refreshToken);
+      }
+
+      // Retry original request with new token
+      const newAccessToken = localStorage.getItem("accessToken");
+      const retryOpts = {
+        ...opts,
+        headers: {
+          ...opts.headers,
+          Authorization: `Bearer ${newAccessToken}`,
+        },
+      };
+      res = await fetch(url, retryOpts);
+    } else {
+      console.warn("LocalStorage refresh failed. User must re-login.");
       return refreshRes;
     }
   }
