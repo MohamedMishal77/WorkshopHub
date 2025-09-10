@@ -9,14 +9,13 @@ const router = express.Router();
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
-// backend/routes/authRoutes.js
 const isProd = process.env.NODE_ENV === "production";
 
 const accessCookieOptions = {
   httpOnly: true,
-  secure: isProd,              // must be true when served over HTTPS (production)
-  sameSite: isProd ? "none" : "lax", // allow cross-site on prod
-  path: "/",                   // explicit
+  secure: isProd,              
+  sameSite: isProd ? "none" : "lax", 
+  path: "/",                   
   maxAge: 15 * 60 * 1000
 };
 
@@ -27,9 +26,6 @@ const refreshCookieOptions = {
   path: "/",
   maxAge: 7 * 24 * 60 * 60 * 1000
 };
-
-
-
 
 // Helpers
 function generateAccessToken(user) {
@@ -48,8 +44,6 @@ function generateRefreshToken(user) {
 router.post("/register", async (req, res) => {
   try {
     const { user_name, email, password } = req.body;
-
-    // Password policy check
     const passwordRegex = /^(?=.*[!@#$%^&*]).{8,}$/;
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
@@ -58,7 +52,6 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    // Check if email exists
     const existing = await pool.query("SELECT id FROM users WHERE email = $1", [
       email
     ]);
@@ -66,10 +59,8 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Email already registered" });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert user (token_version defaults to 0 in DB schema)
     const result = await pool.query(
       `INSERT INTO users (user_name, email, password_hash)
        VALUES ($1, $2, $3) RETURNING id, user_name, email, token_version`,
@@ -91,7 +82,6 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user
     const result = await pool.query("SELECT * FROM users WHERE email = $1", [
       email
     ]);
@@ -100,29 +90,23 @@ router.post("/login", async (req, res) => {
     }
 
     const user = result.rows[0];
-
-    // Check password
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Tokens
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    // Save refresh token in DB
     await pool.query(
       `INSERT INTO refresh_tokens (user_id, token, expires_at)
        VALUES ($1, $2, NOW() + interval '7 days')`,
       [user.id, refreshToken]
     );
 
-    // Send both tokens as httpOnly cookies
     res.cookie("accessToken", accessToken, accessCookieOptions);
     res.cookie("refreshToken", refreshToken, refreshCookieOptions);
 
-    // Return minimal user info (no tokens in body)
     res.json({
       message: "Login successful. Redirecting to dashboard...",
       user: { id: user.id, email: user.email, user_name: user.user_name }
@@ -133,16 +117,52 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// ==================== LOGIN-REDIRECT (for iOS Safari/Chrome) ====================
+router.post("/login-redirect", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
+      email
+    ]);
+    if (result.rows.length === 0) {
+      return res.status(401).send("Invalid credentials");
+    }
+
+    const user = result.rows[0];
+    const match = await bcrypt.compare(password, user.password_hash);
+    if (!match) {
+      return res.status(401).send("Invalid credentials");
+    }
+
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    await pool.query(
+      `INSERT INTO refresh_tokens (user_id, token, expires_at)
+       VALUES ($1, $2, NOW() + interval '7 days')`,
+      [user.id, refreshToken]
+    );
+
+    res.cookie("accessToken", accessToken, accessCookieOptions);
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions);
+
+    // 🔑 Important: redirect back to frontend dashboard
+    return res.redirect("https://theworkshophub.netlify.app/dashboard");
+  } catch (err) {
+    console.error("Login redirect error:", err);
+    res.status(500).send("Server error");
+  }
+});
+
 // ==================== REFRESH TOKEN (with rotation) ====================
 router.post("/refresh", async (req, res) => {
   const oldRefreshToken = req.cookies.refreshToken;
   if (!oldRefreshToken) return res.sendStatus(401);
 
   try {
-    // Verify old refresh token
     const decoded = jwt.verify(oldRefreshToken, REFRESH_TOKEN_SECRET);
 
-    // Check DB for old token
     const result = await pool.query(
       "SELECT * FROM refresh_tokens WHERE token = $1 AND user_id = $2",
       [oldRefreshToken, decoded.id]
@@ -152,25 +172,20 @@ router.post("/refresh", async (req, res) => {
     }
 
     const userId = decoded.id;
-
-    // Delete old refresh token (rotation)
     await pool.query("DELETE FROM refresh_tokens WHERE token = $1", [
       oldRefreshToken
     ]);
 
-    // Generate new refresh token
     const newRefreshToken = jwt.sign({ id: userId }, REFRESH_TOKEN_SECRET, {
       expiresIn: "7d"
     });
 
-    // Save new refresh token in DB
     await pool.query(
       `INSERT INTO refresh_tokens (user_id, token, expires_at)
        VALUES ($1, $2, NOW() + interval '7 days')`,
       [userId, newRefreshToken]
     );
 
-    // Fetch user's token_version for access token payload
     const userRes = await pool.query(
       "SELECT id, email, token_version FROM users WHERE id = $1",
       [userId]
@@ -180,10 +195,8 @@ router.post("/refresh", async (req, res) => {
     }
     const user = userRes.rows[0];
 
-    // Generate new access token
     const accessToken = generateAccessToken(user);
 
-    // Send new cookies
     res.cookie("accessToken", accessToken, accessCookieOptions);
     res.cookie("refreshToken", newRefreshToken, refreshCookieOptions);
 
@@ -215,7 +228,7 @@ router.post("/logout", async (req, res) => {
 // ==================== VALIDATE ACCESS TOKEN ====================
 router.get("/validate", (req, res) => {
   try {
-    console.log("Incoming cookies on /validate:", req.cookies); 
+    console.log("Incoming cookies on /validate:", req.cookies);
     const token = req.cookies.accessToken;
     if (!token) {
       return res.status(401).json({ message: "No token provided" });
