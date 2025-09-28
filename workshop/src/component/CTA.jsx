@@ -9,9 +9,10 @@ const CTA = () => {
       <div className="cta-content">
         <h2>Ready to learn or share your skills?</h2>
         <p>
-          Join thousands of learners and experts who are already part of our growing community.
+          Join thousands of learners and experts who are already part of our
+          growing community.
         </p>
-        
+
         <div className="cta-buttons">
           <button
             className="btn btn-gradient btn-lg"
